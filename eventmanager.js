@@ -53,16 +53,15 @@ var EM = new function () {
      *  @scope protected
      */
     var rootEventHandler = function (e) {
-        var evt = cloneEvent(e)
-           ,id = null
+        unifyEvent(e)
+        var id = null
            ,hid = null
-           ,el = e.target || e.srcElement
+           ,el = e.target
            ,fe = true;
 
-        evt.target = el;
         if (!(id = e.currentTarget[keys.UEID]) || !(hid = pool[id].handler[e.type])) return;
 
-        for (var i=0, hL=hid.length; i<hL; i++) if (isFunction(hid[i])) hid[i](evt);
+        for (var i=0, hL=hid.length; i<hL; i++) if (isFunction(hid[i])) hid[i](e);
     }
     /**
      *  Prevents event from calling default event handler
@@ -70,7 +69,6 @@ var EM = new function () {
      *  @scope protected
      */
     var preventDefault = function() {
-        if (this.preventDefault) this.preventDefault();
         this.returnValue = false;
     }
     /**
@@ -79,7 +77,6 @@ var EM = new function () {
      *  @scope protected
      */
     var stopPropagation = function() {
-        if (this.stopPropagation) this.stopPropagation();
         this.cancelBubble = true;
     }
     /**
@@ -131,14 +128,12 @@ var EM = new function () {
      *  @return {Object} cloned event
      *  @scope private
      */
-    var cloneEvent = function (e) {
-        var res = {};
-        for (var i in e) try {if (!isFunction(e[i])) res[i] = e[i]}catch(err){}
-        res.sourceEvent = e;
-        res.preventDefault = bindEventFunction(e, preventDefault);
-        res.stopPropagation = bindEventFunction(e, stopPropagation);
-        res.getCursorPosition = DOM.getCursorPosition;
-        return res;
+    var unifyEvent = function (e) {
+        if (!e.preventDefault) e.preventDefault = bindEventFunction(e, preventDefault);
+        if (!e.stopPropagation) e.preventDefault = bindEventFunction(e, stopPropagation);
+        if (!e.getCursorPosition) e.getCursorPosition = DOM.getCursorPosition;
+        if (!e.target) e.target = e.srcElement;
+        return e;
     }
     /**
      *  Returns UEID property for the specified element, creates it, if asked
