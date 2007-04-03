@@ -1,6 +1,18 @@
-//-----------------------------------------------------------------------------
-//  DOM related stuff
-//-----------------------------------------------------------------------------
+/*
+*  $Id: documentselection.js 220 2007-02-27 17:36:58Z wingedfox $
+*  $HeadURL: https://svn.debugger.ru/repos/jslibs/BrowserExtensions/trunk/documentselection.js $
+*
+*  DOM-related stuff and CSS manipulation class
+*
+*  @author Ilya Lebedev
+*  @author $Author: wingedfox $
+*  @modified $Date: 2007-02-27 20:36:58 +0300 (Вт, 27 фев 2007) $
+*  @version $Rev: 220 $
+*  @license LGPL
+*  @depends helpers.js
+*  @depends arrayextensions.js
+*/
+
 if (isUndefined(DOM)) var DOM = {};
 /**
  *  Performs parent lookup by
@@ -253,7 +265,7 @@ DOM.CSS = function (el) {
           if (csstext != el.className) css = el.className.split(/\s+/);
           for (var i=arguments.length, ar, f=false; i>=0; i--) {
               ar=arguments[i];
-              if (isString(ar)) css.splice(css.indexOf(ar),1);
+              if (isString(ar) && css.indexOf(ar)>-1) css.splice(css.indexOf(ar),1);
           }
           el.className = css.join(" ");
           return csstext = el.className;
@@ -275,5 +287,9 @@ DOM.CSS = function (el) {
   }
   if (isUndefined(el.className)) { throw new Error('Invalid element supplied, no className attribute detected');}
 
-  return (el[keys.singleton] || (el[keys.singleton] = new instance(el)));
+  /*
+  *  this is used for the IE, because sometimes it looses the singleton somehow
+  */
+  try {el[keys.singleton].t=true; return el[keys.singleton]} catch(e) { return el[keys.singleton] = new instance(el) }
+
 }
