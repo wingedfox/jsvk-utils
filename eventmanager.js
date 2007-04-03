@@ -130,7 +130,7 @@ var EM = new function () {
      */
     var unifyEvent = function (e) {
         if (!e.preventDefault) e.preventDefault = bindEventFunction(e, preventDefault);
-        if (!e.stopPropagation) e.preventDefault = bindEventFunction(e, stopPropagation);
+        if (!e.stopPropagation) e.stopPropagation = bindEventFunction(e, stopPropagation);
         if (!e.getCursorPosition) e.getCursorPosition = DOM.getCursorPosition;
         if (!e.target) e.target = e.srcElement;
         return e;
