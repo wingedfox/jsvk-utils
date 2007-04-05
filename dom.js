@@ -1,13 +1,13 @@
 /*
-*  $Id: documentselection.js 220 2007-02-27 17:36:58Z wingedfox $
-*  $HeadURL: https://svn.debugger.ru/repos/jslibs/BrowserExtensions/trunk/documentselection.js $
+*  $Id$
+*  $HeadURL$
 *
 *  DOM-related stuff and CSS manipulation class
 *
 *  @author Ilya Lebedev
-*  @author $Author: wingedfox $
-*  @modified $Date: 2007-02-27 20:36:58 +0300 (Вт, 27 фев 2007) $
-*  @version $Rev: 220 $
+*  @author $Author$
+*  @modified $Date$
+*  @version $Rev$
 *  @license LGPL
 *  @depends helpers.js
 *  @depends arrayextensions.js
@@ -33,7 +33,7 @@ DOM.getParent = function (el /* : HTMLElement */, cp /* :String, HTMLElement */,
        ('string' == typeof cp && DOM.hasTagName(el, cp)) ||
        el == cp)) return el;
   else return arguments.callee(el.parentNode, cp, vl); 
-}
+};
 /**
  *  Calculates the offset for the DOM node from top left corner
  * 
@@ -116,7 +116,7 @@ DOM.getOffset = function (el /* :HTMLElement */) /* :Object */ {
     }
     
     return {'x':left, 'y':top, 'width':width, 'height':height};
-  };
+};
   
 //DOM.getOffset = function (el /* :HTMLElement */) /* :Object */ {
 /*
@@ -141,7 +141,7 @@ DOM.getClientWidth = function () /* :Number */{
     else if (document.documentElement && document.documentElement.clientWidth) w = document.documentElement.clientWidth;
     else if (document.body) w = document.body.clientWidth;
     return w;
-}
+};
 /**
  *  Returns the height of the window canvas
  * 
@@ -154,7 +154,7 @@ DOM.getClientHeight = function () /* :Number */{
     else if (document.documentElement && document.documentElement.clientHeight) h = document.documentElement.clientHeight;
     else if (document.body) h = document.body.clientHeight;
     return h;
-}
+};
 /**
  *  Returns the height of the scrolled area for the body
  * 
@@ -163,7 +163,7 @@ DOM.getClientHeight = function () /* :Number */{
  */
 DOM.getBodyScrollTop = function () /* :Number */{
     return self.pageYOffset || (document.documentElement && document.documentElement.scrollTop) || (document.body && document.body.scrollTop);
-}
+};
 /**
  *  Returns the height of the scrolled area for the body
  * 
@@ -172,7 +172,7 @@ DOM.getBodyScrollTop = function () /* :Number */{
  */
 DOM.getBodyScrollLeft = function () /* :Number */{
     return self.pageXOffset || (document.documentElement && document.documentElement.scrollLeft) || (document.body && document.body.scrollLeft);
-}
+};
 /**
  *  Calculates cursor position properly
  *
@@ -188,7 +188,7 @@ DOM.getCursorPosition = function (e) {
     var de = document.documentElement || document.body;
     return {'x': e.clientX + de.scrollLeft - (de.clientLeft || 0)
            ,'y': e.clientY + de.scrollTop - (de.clientTop || 0)};
-}
+};
 /**
  *  Checks, if property matches a tagname(s)
  * 
@@ -205,7 +205,7 @@ DOM.hasTagName = function (prop /* :HTMLElement */, tags /* :String, Array */) {
         if (tags[i].toLowerCase() == t) return true;
     }
     return false;
-}
+};
 
 /**
  *  DOM.CSS is the CSS processing class, allowing to easy mangle class names
@@ -221,7 +221,7 @@ DOM.hasTagName = function (prop /* :HTMLElement */, tags /* :String, Array */) {
 DOM.CSS = function (el) {
   var keys = {
       'singleton' : 'DOM_CSS_singletonObject'
-  }
+  };
   /**
    *  Interface itself
    *
@@ -253,7 +253,7 @@ DOM.CSS = function (el) {
           }
           if (f) el.className = css.join(" ");
           return csstext = el.className;
-      }
+      };
       /**
        *  Removes the class name, unlimited number of arguments is supported
        *
@@ -269,7 +269,7 @@ DOM.CSS = function (el) {
           }
           el.className = css.join(" ");
           return csstext = el.className;
-      }
+      };
       /**
        *  Checks classname for the certain class
        *
@@ -284,12 +284,12 @@ DOM.CSS = function (el) {
           }
           return css.indexOf(c)>-1;
       }
-  }
-  if (isUndefined(el.className)) { throw new Error('Invalid element supplied, no className attribute detected');}
+  };
+  if (isUndefined(el.className)) { throw new Error('Invalid element supplied, no className attribute detected');};
 
   /*
   *  this is used for the IE, because sometimes it looses the singleton somehow
   */
   try {el[keys.singleton].t=true; return el[keys.singleton]} catch(e) { return el[keys.singleton] = new instance(el) }
 
-}
+};

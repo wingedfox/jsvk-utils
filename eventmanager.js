@@ -1,8 +1,14 @@
 /**
+ *  $Id$
+ *  $HeadURL$
+ *
  *  EventManager (EM shorthand) is the class, written to manage event attach/detach/register and so on
  *
- *
- *
+ *  @modified $Date$
+ *  @version $Rev$
+ *  @license LGPL 2.1 or later
+ *  @author Ilya Lebedev <ilya@lebedev.net>
+ *  @depends helpers.js
  *
  *  @class
  *  @constructor EventManager
@@ -40,7 +46,7 @@ var EM = new function () {
     var keys = {
         'UEID' : '__eventManagerUniqueElementId'
 //       ,'UHID' : '__eventManagerUniqueHandlerId'
-    }
+    };
     /**************************************************************************
     *  PROTECTED METHODS
     ***************************************************************************/
@@ -53,7 +59,7 @@ var EM = new function () {
      *  @scope protected
      */
     var rootEventHandler = function (e) {
-        unifyEvent(e)
+        unifyEvent(e);
         var id = null
            ,hid = null
            ,el = e.target
@@ -61,8 +67,8 @@ var EM = new function () {
 
         if (!(id = e.currentTarget[keys.UEID]) || !(hid = pool[id].handler[e.type])) return;
 
-        for (var i=0, hL=hid.length; i<hL; i++) if (isFunction(hid[i])) hid[i](e);
-    }
+        for (var i=0, hL=hid.length; i<hL; i++) if (isFunction(hid[i])) hid[i].call(e.currentTarget, e);
+    };
     /**
      *  Prevents event from calling default event handler
      *
@@ -70,7 +76,7 @@ var EM = new function () {
      */
     var preventDefault = function() {
         this.returnValue = false;
-    }
+    };
     /**
      *  Prevents event from futher bubbling
      *
@@ -78,7 +84,7 @@ var EM = new function () {
      */
     var stopPropagation = function() {
         this.cancelBubble = true;
-    }
+    };
     /**
      *  Performs events cleanup on page unload
      *  It aims to remove leaking closures
@@ -107,7 +113,7 @@ var EM = new function () {
        } else {
            window.detachEvent('on'+z, arguments.callee);
        }
-    }
+    };
     /**************************************************************************
     *  PRIVATE METHODS
     ***************************************************************************/
@@ -120,7 +126,7 @@ var EM = new function () {
      */
     var bindEventFunction = function(e,f) {
         return function(){f.apply(e,arguments)};
-    }
+    };
     /**
      *  Makes an event clone, it does not dereference objects in the event properties
      *
@@ -134,7 +140,7 @@ var EM = new function () {
         if (!e.getCursorPosition) e.getCursorPosition = DOM.getCursorPosition;
         if (!e.target) e.target = e.srcElement;
         return e;
-    }
+    };
     /**
      *  Returns UEID property for the specified element, creates it, if asked
      *
@@ -145,7 +151,7 @@ var EM = new function () {
      */
     var getUEID = function (el, f) {
         return el[keys.UEID] || (f && (el[keys.UEID] = ++UID));
-    }
+    };
     /**************************************************************************
     *  PUBLIC METHODS
     ***************************************************************************/
@@ -176,7 +182,7 @@ var EM = new function () {
                 'node' : el
                ,'handler' : {}
             }
-        }
+        };
         pid = pool[id];
         /*
         *  prepare handlers storage in the pool object, if needed
@@ -197,10 +203,10 @@ var EM = new function () {
                     e.currentTarget = pid.node;//pool[id].node;
                     rootEventHandler(e);
                     e.currentTarget = null;
-                }
+                };
                 el.attachEvent('on'+et, pid.rootEHCaller);
             }
-        }
+        };
         hid = pid.handler[et];
         /*
         *  finally, attach handler, if it was not attached before
@@ -210,7 +216,7 @@ var EM = new function () {
             return true;
         }
         return false;
-    }
+    };
     /**
      *  Removes the event listener from the queue
      *
@@ -244,7 +250,7 @@ var EM = new function () {
             return true;
         }
         return false;
-    }
+    };
     /**
      *  Dispatch custom events on the specified element
      *
@@ -257,7 +263,7 @@ var EM = new function () {
         e.currentTarget = el;
         rootEventHandler(e);
         e.currentTarget = null;
-    }
+    };
     /**
      *  Registers new event handler for any object
      *  It's a good idea to register events on the object instances, really
@@ -272,7 +278,7 @@ var EM = new function () {
         var id = getUEID(o,true);
 
         return new EM.EventTarget(o,n);
-    }
+    };
     /**
      *  Performs object initialization
      *
@@ -283,9 +289,9 @@ var EM = new function () {
         } else {
 			window.attachEvent('onunload',unloadEventHandler);
         }
-    }
+    };
     __construct();
-}
+};
 /**
  *  EventTarget base class
  *  Used to create self-containing event object
@@ -351,7 +357,7 @@ EM.EventTarget = function (name, obj, bubble, def) {
             e.target = el;
             e.type = name;
             EM.dispatchEvent(el, e);
-        } while ((el = el.parentNode) && el.canBubble)
+        } while ((el = el.parentNode) && el.canBubble);
         /*
         *  try to execute the default action
         */
@@ -359,7 +365,7 @@ EM.EventTarget = function (name, obj, bubble, def) {
             defaultAction(e);
         }
         return !!defaultAction;
-    }
+    };
     /**
      *  Prevents default event action
      *
@@ -367,7 +373,7 @@ EM.EventTarget = function (name, obj, bubble, def) {
      */
     var preventDefault = function () {
         defaultAction = null;
-    }
+    };
     /**
      *  Stops bubbling
      *
@@ -375,8 +381,8 @@ EM.EventTarget = function (name, obj, bubble, def) {
      */
     var stopPropagation = function () {
         canBubble = false;
-    }
-}
+    };
+};
 
 /*
 *  register core event handler, domload
@@ -384,7 +390,7 @@ EM.EventTarget = function (name, obj, bubble, def) {
 */
 new (function () {
     
-    var evt = EM.registerEvent('domload',document)
+    var evt = EM.registerEvent('domload',window)
        ,executed = false
        ,clearEvents = function() {
            //For IE
@@ -396,12 +402,12 @@ new (function () {
        }
        ,handlers = { 'ie' : function(e) {
                                if (window.event.propertyName == 'activeElement' && !executed) {
-                                   evt.trigger(document);
+                                   evt.trigger(window);
                                    clearEvents();
                                    executed = true;
                                }
                            }
-                    ,'mz' : function (e) {if(!executed)evt.trigger(document); executed=true;}
+                    ,'mz' : function (e) {if(!executed)evt.trigger(window); executed=true;}
                    };
 
     //For IE
@@ -412,4 +418,4 @@ new (function () {
     if(/WebKit|Khtml/i.test(navigator.userAgent)||(window.opera&&parseInt(window.opera.version())<9))(function(){/loaded|complete/.test(document.readystate)?evt.trigger(document):setTimeout(arguments.callee,100)})();
     //For someone else
     EM.addEventListener(window, 'load', handlers.mz);
-})
+});
