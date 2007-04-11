@@ -63,11 +63,16 @@ var EM = new function () {
         var id = null
            ,hid = null
            ,el = e.target
-           ,fe = true;
+           ,fe = true
+           ,res = true;
 
         if (!(id = e.currentTarget[keys.UEID]) || !(hid = pool[id].handler[e.type])) return;
 
-        for (var i=0, hL=hid.length; i<hL; i++) if (isFunction(hid[i])) hid[i].call(e.currentTarget, e);
+        try {
+            for (var i=0, hL=hid.length; i<hL; i++) if (isFunction(hid[i])) res=res&&!(false===hid[i].call(e.currentTarget, e));
+        } catch (err) { setTimeout(function(){throw new Error("Event handler for ["+e.type+"] has failed with exception: \""+err.message+"\"");},10) }
+
+        return res;
     };
     /**
      *  Prevents event from calling default event handler
@@ -201,8 +206,9 @@ var EM = new function () {
                 */
                 pid.rootEHCaller = function(e) { 
                     e.currentTarget = pid.node;//pool[id].node;
-                    rootEventHandler(e);
+                    var res = rootEventHandler(e);
                     e.currentTarget = null;
+                    return res;
                 };
                 el.attachEvent('on'+et, pid.rootEHCaller);
             }
@@ -261,8 +267,9 @@ var EM = new function () {
      */
     self.dispatchEvent = function (el,e) {
         e.currentTarget = el;
-        rootEventHandler(e);
+        var res = rootEventHandler(e);
         e.currentTarget = null;
+        return res;
     };
     /**
      *  Registers new event handler for any object
@@ -270,14 +277,16 @@ var EM = new function () {
      *
      *  @param {Object} o object to register new event on
      *  @param {String} n bindable event name
+     *  @param {Boolean} b optional bubbling allowed flag
+     *  @param {Function} d optional default action function
      *  @return {EMEvent} object, allowing to invoke events
      *  @scope public
      *  @see EM.EventTarget
      */
-    self.registerEvent = function (o, n) {
+    self.registerEvent = function (o, n, b, d) {
         var id = getUEID(o,true);
 
-        return new EM.EventTarget(o,n);
+        return new EM.EventTarget(o, n, b, d);
     };
     /**
      *  Performs object initialization
@@ -321,7 +330,6 @@ EM.EventTarget = function (name, obj, bubble, def) {
      *  @scope private
      */
     var defaultAction = isFunction(def)?def:null;
-
     /**************************************************************************
     *  PRIVATE METHODS
     ***************************************************************************/
@@ -337,7 +345,10 @@ EM.EventTarget = function (name, obj, bubble, def) {
      */
     self.trigger = function (el, data) {
         if (!el) el = obj;
-        var e = {};
+        var e = {}
+           ,res = true
+           ,undef = true
+           ,tmp = null
         for (var i in data) {
             if (data.hasOwnProperty(i)) e[i] = data[i];
         }
@@ -356,15 +367,17 @@ EM.EventTarget = function (name, obj, bubble, def) {
             e.stopPropagation = stopPropagation;
             e.target = el;
             e.type = name;
-            EM.dispatchEvent(el, e);
-        } while ((el = el.parentNode) && el.canBubble);
+            tmp = EM.dispatchEvent(el, e);
+            undef &= (isUndefined(tmp))
+            res &= !(false===tmp);
+        } while ((el = el.parentNode) && canBubble);
         /*
         *  try to execute the default action
         */
-        if (isFunction(defaultAction)) {
+        if (isFunction(defaultAction) && res && !undef) {
             defaultAction(e);
         }
-        return !!defaultAction;
+        return (defaultAction && res && !undef);
     };
     /**
      *  Prevents default event action
@@ -388,7 +401,7 @@ EM.EventTarget = function (name, obj, bubble, def) {
 *  register core event handler, domload
 *  it's called right on the document initialization, before images complete load
 */
-new (function () {
+(function (){
     
     var evt = EM.registerEvent('domload',window)
        ,executed = false
@@ -418,4 +431,4 @@ new (function () {
     if(/WebKit|Khtml/i.test(navigator.userAgent)||(window.opera&&parseInt(window.opera.version())<9))(function(){/loaded|complete/.test(document.readystate)?evt.trigger(document):setTimeout(arguments.callee,100)})();
     //For someone else
     EM.addEventListener(window, 'load', handlers.mz);
-});
+})();
