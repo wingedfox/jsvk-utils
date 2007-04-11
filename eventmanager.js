@@ -140,9 +140,8 @@ var EM = new function () {
      *  @scope private
      */
     var unifyEvent = function (e) {
-        if (!e.preventDefault) e.preventDefault = bindEventFunction(e, preventDefault);
-        if (!e.stopPropagation) e.stopPropagation = bindEventFunction(e, stopPropagation);
-        if (!e.getCursorPosition) e.getCursorPosition = DOM.getCursorPosition;
+        if (!e.preventDefault) e.preventDefault = preventDefault; //bindEventFunction(e, preventDefault);
+        if (!e.stopPropagation) e.stopPropagation = stopPropagation; //bindEventFunction(e, stopPropagation);
         if (!e.target) e.target = e.srcElement;
         return e;
     };
