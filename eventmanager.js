@@ -300,6 +300,19 @@ var EM = new function () {
     };
     __construct();
 };
+/******************************************************************************
+*  STATIC METHODS
+******************************************************************************/
+EM.preventDefaultAction = function(e) {
+    e.preventDefault();
+}
+EM.stopPropagationAction = function(e) {
+    e.stopPropagation();
+}
+
+/******************************************************************************
+*  SUPPLEMENTARY CLASSES
+******************************************************************************/
 /**
  *  EventTarget base class
  *  Used to create self-containing event object
