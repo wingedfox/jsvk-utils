@@ -75,22 +75,6 @@ var EM = new function () {
         return res;
     };
     /**
-     *  Prevents event from calling default event handler
-     *
-     *  @scope protected
-     */
-    var preventDefault = function() {
-        this.returnValue = false;
-    };
-    /**
-     *  Prevents event from futher bubbling
-     *
-     *  @scope protected
-     */
-    var stopPropagation = function() {
-        this.cancelBubble = true;
-    };
-    /**
      *  Performs events cleanup on page unload
      *  It aims to remove leaking closures
      *
@@ -123,16 +107,6 @@ var EM = new function () {
     *  PRIVATE METHODS
     ***************************************************************************/
     /**
-     *  Calls binded function in the context of the event
-     *
-     *  @param {Event} e target event
-     *  @param {Function} f function to bind
-     *  @scope private
-     */
-    var bindEventFunction = function(e,f) {
-        return function(){f.apply(e,arguments)};
-    };
-    /**
      *  Makes an event clone, it does not dereference objects in the event properties
      *
      *  @param {Event} e event handler
@@ -140,8 +114,21 @@ var EM = new function () {
      *  @scope private
      */
     var unifyEvent = function (e) {
-        if (!e.preventDefault) e.preventDefault = preventDefault; //bindEventFunction(e, preventDefault);
-        if (!e.stopPropagation) e.stopPropagation = stopPropagation; //bindEventFunction(e, stopPropagation);
+        var i=self.EU.length
+           ,cur,cur1,k,init
+        while (i--) {
+            cur = self.EU[i];
+            if (cur[0].test(e.type)) {
+               k=cur[1].length;
+               init = null;
+               while (k--) {
+                   cur1 = cur[1][k];
+                   if ('init' == cur1[0]) init = cur1[1]
+                   else if (!e[cur1[0]]) e[cur1[0]] = cur1[1];
+               }
+               if (init) init.call(e);
+            }
+        }
         if (!e.target) e.target = e.srcElement;
         return e;
     };
@@ -292,10 +279,11 @@ var EM = new function () {
      *
      */
     var __construct = function() {
-        if (window.addEventListener) {
-            window.addEventListener('unload',unloadEventHandler,false);
-        } else {
-			window.attachEvent('onunload',unloadEventHandler);
+        /*
+        *  for IE, to dereference event handlers and remove memory leaks
+        */
+        if (window.attachEvent && !window.addEventListener) {
+            window.attachEvent('onunload',unloadEventHandler);
         }
     };
     __construct();
@@ -408,6 +396,88 @@ EM.EventTarget = function (name, obj, bubble, def) {
         canBubble = false;
     };
 };
+/**
+ *  Namespace for event unification routines
+ *
+ *  @type Array
+ *  @scope protected
+ */
+EM.EU = [
+    [/./ , [
+        /**
+         *  Prevents event from calling default event handler
+         *
+         *  @scope protected
+         */
+        ['preventDefault', function() {
+                 this.returnValue = false;
+             }
+        ]
+        /**
+         *  Prevents event from futher bubbling
+         *
+         *  @scope protected
+         */
+       ,['stopPropagation', function() {
+                this.cancelBubble = true;
+             }
+        ]
+    ]]
+   ,[/^mouse(over|out|down|up)/ , [
+        /**
+         *  Used to detect left or right button pressed.
+         *  Due to some browser inconsistense, middle button is ignored
+         *
+         *  @return {Number} 1 - left button, 2 - right button
+         *  @scope protected
+         */
+        ['getButton', function () {
+                 return this.button==2?2:1
+             }
+        ]
+       ,['EM_MB_LEFT', '1']
+       ,['EM_MB_RIGHT', '2']
+    ]]
+   ,[/^key(down|up|press)/ , [
+        /**
+         *  Used to return browser-independend keycode
+         *
+         *  @return {Number} fixed key code
+         *  @scope protected
+         */
+        ['getKeyCode', function () {
+                 switch (this.keyCode) {
+                     case 189: return 109;
+                     case 187: return 61;
+                     case 186: return 59;
+                     default:  return this.keyCode;
+                 }
+             }
+        ]
+       /**
+        *  Calculates 'repeat' property for the key events
+        *
+        *  @return {Number} 0 means no repeating keystroke detected
+        *  @scope protected
+        */
+       ,['getRepeat', function () {
+                          return arguments.callee.repeat
+                      }
+        ]
+       ,['init', function () {
+                  var ac = this.getRepeat
+                  if ('keyup' == this.type) {
+                      ac.repeat = 0;
+                      ac.keyCode = 0;
+                  } else if ('keydown' == this.type) {
+                      ac.repeat = ac.keyCode==this.keyCode;
+                      ac.keyCode=this.keyCode;
+                  }
+              }
+        ]
+    ]]
+
+];
 
 /*
 *  register core event handler, domload
