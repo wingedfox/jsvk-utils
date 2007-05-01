@@ -206,7 +206,31 @@ DOM.hasTagName = function (prop /* :HTMLElement */, tags /* :String, Array */) {
     }
     return false;
 };
-
+/**
+ *  Returns the actual rgb color value from the following formats
+ *  #xxxxxx
+ *  rgb (0..255, 0..255,0..255)
+ *  rgb (0..100%, 0..100%,0..100%)
+ *  <color_name>
+ *
+ *  @param {String} from attr name
+ *  @return {Array} rgb values
+ *  @scope public
+ */
+DOM.color2rgb = function (prop) {
+     var e;
+     if (/^[a-z]+$/i.test(prop)) {
+         var d = document.body, ov = d.vLink;
+         d.vLink = prop;
+         prop = d.vLink;
+         d.vLink = ov;
+     }
+     if (/^#[\da-f]{6}$/i.test(prop))
+         return e=parseInt(prop.replace(/[^\da-f]/,''),16),[(e&0xff0000)>>16,(e&0xff00)>>8,(e&0xff)]
+     else {
+         return (prop.split(/^|[^\d%]+/).splice(1,2).map(function(a){ return /%/.test(a)?(parseInt(a)*2.55).toFixed(0):parseInt(a)}))
+     }
+}
 /**
  *  DOM.CSS is the CSS processing class, allowing to easy mangle class names
  *
@@ -283,6 +307,25 @@ DOM.CSS = function (el) {
               css = csstext.split(/\s+/);
           }
           return css.indexOf(c)>-1;
+      };
+      /**
+       *  Returns actual style for the element, computed from CSS and inline styles
+       *
+       *  @param {String} prop optional style property to fetch
+       *  @return {Object} computed style or property value
+       *  @scope public
+       */
+      self.getComputedStyle = function(prop) {
+          var y;
+          if (el.currentStyle)
+              y = prop?el.currentStyle[prop]:x.currentStyle;
+          else if (window.getComputedStyle) {
+              y = document.defaultView.getComputedStyle(el,null);
+              if (prop) y=y.getPropertyValue(prop)
+          } else {
+              y = null;
+          }
+          return y;
       }
   };
   if (isUndefined(el.className)) { throw new Error('Invalid element supplied, no className attribute detected');};
