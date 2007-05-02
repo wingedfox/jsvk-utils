@@ -207,28 +207,36 @@ DOM.hasTagName = function (prop /* :HTMLElement */, tags /* :String, Array */) {
     return false;
 };
 /**
- *  Returns the actual rgb color value from the following formats
- *  #xxxxxx
+ *  Return the actual rgb color value from the following formats
+ *  #rrggbb
+ *  #rgb
  *  rgb (0..255, 0..255,0..255)
  *  rgb (0..100%, 0..100%,0..100%)
  *  <color_name>
  *
  *  @param {String} from attr name
- *  @return {Array} rgb values
+ *  @return {Array} r,g,b values
  *  @scope public
  */
 DOM.color2rgb = function (prop) {
      var e;
-     if (/^[a-z]+$/i.test(prop)) {
+     /*
+     *  note, properties like borderColor might have the series of colors
+     */
+     if (/^([a-z]+)($|\s[a-z]+)/i.test(prop)) {
          var d = document.body, ov = d.vLink;
-         d.vLink = prop;
+         d.vLink = prop.split(" ")[0];
          prop = d.vLink;
          d.vLink = ov;
      }
-     if (/^#[\da-f]{6}$/i.test(prop))
-         return e=parseInt(prop.replace(/[^\da-f]/,''),16),[(e&0xff0000)>>16,(e&0xff00)>>8,(e&0xff)]
-     else {
-         return (prop.split(/^|[^\d%]+/).splice(1,2).map(function(a){ return /%/.test(a)?(parseInt(a)*2.55).toFixed(0):parseInt(a)}))
+     try {
+     if (e = prop.match(/^#([\da-f]{6})$/i))
+         return e=parseInt(e[1],16),[(e&0xff0000)>>16,(e&0xff00)>>8,(e&0xff)]
+     else if (e = prop.match(/^#([\da-f]{3})$/i)) {
+         return e=parseInt(e[1],16),[((e&0xf00)>>8)*0x11,((e&0xf0)>>4)*0x11,(e&0xf)*0x11];
+     } else
+         return (prop.match(/([\d%]+)/g).splice(0,3).map(function(a){ return /%/.test(a)?(parseInt(a)*2.55).toFixed(0):parseInt(a)}))
+     } catch(err){
      }
 }
 /**
