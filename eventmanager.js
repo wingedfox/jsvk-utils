@@ -156,7 +156,7 @@ var EM = new function () {
      *  @scope public
      */
     self.addEventListener = function (el, et, h) {
-        if (!isFunction(h)) return false;
+        if (!el || !isFunction(h)) return false;
         if (!el.addEventListener && !el.attachEvent) return false;
         /*
         *  unique identifier is used to keep an eye on the element
@@ -219,7 +219,7 @@ var EM = new function () {
      *  @scope public
      */
     self.removeEventListener = function (el,et,h) {
-        if (!isFunction(h)) return false;
+        if (!el || !isFunction(h)) return false;
         var id = getUEID(el)
            ,pid = pool[id]
            ,eid = null;
