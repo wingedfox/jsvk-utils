@@ -89,7 +89,7 @@ var EM = new function () {
 
                     if (el.removeEventListener) {
                         el.removeEventListener(z, pid.rootEHCaller?pid.rootEHCaller:rootEventHandler, false);
-                    } else {
+                    } else if (el.detachEvent) {
                         el.detachEvent('on'+z, pid.rootEHCaller?pid.rootEHCaller:rootEventHandler);
                     }
                     pid.handler[z].length = 0;
@@ -157,7 +157,7 @@ var EM = new function () {
      */
     self.addEventListener = function (el, et, h) {
         if (!el || !isFunction(h)) return false;
-        if (!el.addEventListener && !el.attachEvent) return false;
+//        if (!el.addEventListener && !el.attachEvent) return false;
         /*
         *  unique identifier is used to keep an eye on the element
         */
@@ -272,7 +272,7 @@ var EM = new function () {
     self.registerEvent = function (o, n, b, d) {
         var id = getUEID(o,true);
 
-        return new EM.EventTarget(o, n, b, d);
+        return new EM.EventTarget(n, o, b, d);
     };
     /**
      *  Performs object initialization
@@ -485,7 +485,7 @@ EM.EU = [
 */
 (function (){
     
-    var evt = EM.registerEvent('domload',window)
+    var evt = EM.registerEvent(window,'domload')
        ,executed = false
        ,clearEvents = function() {
            //For IE
