@@ -271,6 +271,8 @@ var EM = new function () {
      */
     self.registerEvent = function (o, n, b, d) {
         var id = getUEID(o,true);
+        pool[id] = {'node' : o,
+                    'handler' : []};
 
         return new EM.EventTarget(n, o, b, d);
     };

@@ -274,7 +274,7 @@ DOM.CSS = function (el) {
        *  Adds the class name, unlimited number of arguments is supported
        *
        *  @param {String} class classname to apply to the element
-       *  @return {String} new class name
+       *  @return {Object} singleton object to chain operations
        *  @scope public
        */
       self.addClass = function() {
@@ -284,13 +284,13 @@ DOM.CSS = function (el) {
               if (isString(ar) && css.indexOf(ar)==-1) {css[css.length] = ar; f=true};
           }
           if (f) el.className = css.join(" ");
-          return csstext = el.className;
+          return self;
       };
       /**
        *  Removes the class name, unlimited number of arguments is supported
        *
        *  @param {String} class classname to apply to the element
-       *  @return {String} new class name
+       *  @return {Object} singleton object to chain operations
        *  @scope public
        */
       self.removeClass = function() {
@@ -300,7 +300,7 @@ DOM.CSS = function (el) {
               if (isString(ar) && css.indexOf(ar)>-1) css.splice(css.indexOf(ar),1);
           }
           el.className = css.join(" ");
-          return csstext = el.className;
+          return self;
       };
       /**
        *  Checks classname for the certain class
@@ -315,6 +315,23 @@ DOM.CSS = function (el) {
               css = csstext.split(/\s+/);
           }
           return css.indexOf(c)>-1;
+      };
+      /**
+       *  Retrieves class value from class name by pattern 
+       *   class-var = "name:value"
+       *   name = [a-z][-a-z0-9]
+       *   value = value | val1:val2:...:valN
+       *
+       *  @param {String} c class name to check for
+       *  @return {String, Array} value(s)
+       *  @scope public
+       */
+      self.getClassValue = function(c) {
+          var vals = el.className.match(new RegExp("(^|\\s)"+c+":([^\\s]+)"));
+
+          return vals?((vals[2].indexOf(":")+1)?vals[2].split(":")
+                                               :vals[2])
+                     :null;
       };
       /**
        *  Returns actual style for the element, computed from CSS and inline styles
