@@ -284,6 +284,7 @@ DOM.CSS = function (el) {
               if (isString(ar) && css.indexOf(ar)==-1) {css[css.length] = ar; f=true};
           }
           if (f) el.className = css.join(" ");
+          csstext = el.className;
           return self;
       };
       /**
@@ -300,6 +301,7 @@ DOM.CSS = function (el) {
               if (isString(ar) && css.indexOf(ar)>-1) css.splice(css.indexOf(ar),1);
           }
           el.className = css.join(" ");
+          csstext = el.className;
           return self;
       };
       /**
@@ -316,6 +318,15 @@ DOM.CSS = function (el) {
           }
           return css.indexOf(c)>-1;
       };
+      /**
+       *  Returns the actual CSS class for the element
+       *
+       *  @return {String} css class
+       *  @scope public
+       */
+      self.getClass = function() {
+          return csstext;
+      }
       /**
        *  Retrieves class value from class name by pattern 
        *   class-var = "name:value"
