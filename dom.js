@@ -251,124 +251,99 @@ DOM.color2rgb = function (prop) {
  *  @depends helpers.js
  */
 DOM.CSS = function (el) {
-  var keys = {
-      'singleton' : 'DOM_CSS_singletonObject'
-  };
-  /**
-   *  Interface itself
-   *
-   *  @param {HTMLElement} el element to provide interface for
-   *  @return DOM.CSS
-   */
-  var instance = function(el) {
-      var self = this
-      /**
-       *  Array of the css classes
-       *
-       *  @type Array
-       *  @scope private
-       */
-         ,css = el.className.split(/\s+/)
-         ,csstext = el.className;
-      /**
-       *  Adds the class name, unlimited number of arguments is supported
-       *
-       *  @param {String} class classname to apply to the element
-       *  @return {Object} singleton object to chain operations
-       *  @scope public
-       */
-      self.addClass = function() {
-          if (csstext != el.className) css = el.className.split(/\s+/);
-          for (var i=arguments.length, ar, f=false; i>=0; i--) {
-              ar=arguments[i];
-              if (isString(ar) && css.indexOf(ar)==-1) {css[css.length] = ar; f=true};
-          }
-          if (f) el.className = css.join(" ");
-          csstext = el.className;
-          return self;
-      };
-      /**
-       *  Removes the class name, unlimited number of arguments is supported
-       *
-       *  @param {String} class classname to apply to the element
-       *  @return {Object} singleton object to chain operations
-       *  @scope public
-       */
-      self.removeClass = function() {
-          if (csstext != el.className) css = el.className.split(/\s+/);
-          for (var i=arguments.length, ar, f=false; i>=0; i--) {
-              ar=arguments[i];
-              if (isString(ar) && css.indexOf(ar)>-1) css.splice(css.indexOf(ar),1);
-          }
-          el.className = css.join(" ");
-          csstext = el.className;
-          return self;
-      };
-      /**
-       *  Checks classname for the certain class
-       *
-       *  @param {String} c class name to check for
-       *  @return {Boolean} class name existence
-       *  @scope public
-       */
-      self.hasClass = function(c) {
-          if (csstext != el.className) {
-              csstext = el.className;
-              css = csstext.split(/\s+/);
-          }
-          return css.indexOf(c)>-1;
-      };
-      /**
-       *  Returns the actual CSS class for the element
-       *
-       *  @return {String} css class
-       *  @scope public
-       */
-      self.getClass = function() {
-          return csstext;
-      }
-      /**
-       *  Retrieves class value from class name by pattern 
-       *   class-var = "name:value"
-       *   name = [a-z][-a-z0-9]
-       *   value = value | val1:val2:...:valN
-       *
-       *  @param {String} c class name to check for
-       *  @return {String, Array} value(s)
-       *  @scope public
-       */
-      self.getClassValue = function(c) {
-          var vals = el.className.match(new RegExp("(^|\\s)"+c+":([^\\s]+)"));
-
-          return vals?((vals[2].indexOf(":")+1)?vals[2].split(":")
-                                               :vals[2])
-                     :null;
-      };
-      /**
-       *  Returns actual style for the element, computed from CSS and inline styles
-       *
-       *  @param {String} prop optional style property to fetch
-       *  @return {Object} computed style or property value
-       *  @scope public
-       */
-      self.getComputedStyle = function(prop) {
-          var y;
-          if (el.currentStyle)
-              y = prop?el.currentStyle[prop]:x.currentStyle;
-          else if (window.getComputedStyle) {
-              y = document.defaultView.getComputedStyle(el,null);
-              if (prop) y=y.getPropertyValue(prop)
-          } else {
-              y = null;
-          }
-          return y;
-      }
-  };
-  if (isUndefined(el.className)) { throw new Error('Invalid element supplied, no className attribute detected');};
-
-  /*
-  *  this is used for the IE, because sometimes it looses the singleton somehow
-  */
-  try {el[keys.singleton].t=true; return el[keys.singleton]} catch(e) { return el[keys.singleton] = new instance(el) }
-
+    var self = this
+    /**
+     *  Adds the class name, unlimited number of arguments is supported
+     *
+     *  @param {String} class classname to apply to the element
+     *  @return {Object} singleton object to chain operations
+     *  @scope public
+     */
+    self.addClass = function() {
+        var css = el.className
+           ,arg = isArray(arguments[0])?arguments[0]:arguments;
+        for (var i=arg.length-1, ar, re; i>=0; i--) {
+            ar=arg[i];
+            re=new RegExp("(^|\\s+)"+ar+"(\\s+|$)");
+            if (!css.match(re))
+                css += " "+ar;
+        }
+        el.className = css;
+        return self;
+    };
+    /**
+     *  Removes the class name, unlimited number of arguments is supported
+     *
+     *  @param {String} class classname to apply to the element
+     *  @return {Object} singleton object to chain operations
+     *  @scope public
+     */
+    self.removeClass = function() {
+        var css = el.className
+           ,arg = isArray(arguments[0])?arguments[0]:arguments;
+        for (var i=arg.length-1, ar, re, f=false; i>=0; i--) {
+            ar=arg[i];
+            re=new RegExp("(^|\\s+)"+ar+"(\\s+|$)");
+            css = css.replace(re," ");
+        }
+        el.className = css;
+        return self;
+    };
+    /**
+     *  Checks classname for the certain class
+     *
+     *  @param {String} c class name to check for
+     *  @return {Boolean} class name existence
+     *  @scope public
+     */
+    self.hasClass = function(c) {
+        re=new RegExp("(^|\\s+)"+c+"(\\s+|$)");
+        return el.className.match(re," "+c+" ");
+    };
+    /**
+     *  Returns the actual CSS class for the element
+     *
+     *  @return {String} css class
+     *  @scope public
+     */
+    self.getClass = function() {
+        return el.className;
+    }
+    /**
+     *  Retrieves class value from class name by pattern 
+     *   class-var = "name:value"
+     *   name = [a-z][-a-z0-9]
+     *   value = value | val1:val2:...:valN
+     *
+     *  @param {String} c class name to check for
+     *  @return {String, Array} value(s)
+     *  @scope public
+     */
+    self.getClassValue = function(c) {
+        var vals = el.className.match(new RegExp("(^|\\s)"+c+":([^\\s]+)"));
+    
+        return vals?((vals[2].indexOf(":")+1)?vals[2].split(":")
+                                             :vals[2])
+                   :null;
+    };
+    /**
+     *  Returns actual style for the element, computed from CSS and inline styles
+     *
+     *  @param {String} prop optional style property to fetch
+     *  @return {Object} computed style or property value
+     *  @scope public
+     */
+    self.getComputedStyle = function(prop) {
+        var y;
+        if (el.currentStyle)
+            y = prop?el.currentStyle[prop]:x.currentStyle;
+        else if (window.getComputedStyle) {
+            y = document.defaultView.getComputedStyle(el,null);
+            if (prop) y=y.getPropertyValue(prop)
+        } else {
+            y = null;
+        }
+        return y;
+    }
+    return this;
 };
