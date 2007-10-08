@@ -260,15 +260,9 @@ DOM.CSS = function (el) {
      *  @scope public
      */
     self.addClass = function() {
-        var css = el.className
-           ,arg = isArray(arguments[0])?arguments[0]:arguments;
-        for (var i=arg.length-1, ar, re; i>=0; i--) {
-            ar=arg[i];
-            re=new RegExp("(^|\\s+)"+ar+"(\\s+|$)");
-            if (!css.match(re))
-                css += " "+ar;
-        }
-        el.className = css;
+        var arg = isArray(arguments[0])?arguments[0]:Array.prototype.slice.call(arguments);
+        self.removeClass(arg);
+        el.className = el.className+" "+Array.prototype.join.call(arg," ");
         return self;
     };
     /**
@@ -279,14 +273,11 @@ DOM.CSS = function (el) {
      *  @scope public
      */
     self.removeClass = function() {
-        var css = el.className
-           ,arg = isArray(arguments[0])?arguments[0]:arguments;
-        for (var i=arg.length-1, ar, re, f=false; i>=0; i--) {
-            ar=arg[i];
-            re=new RegExp("(^|\\s+)"+ar+"(\\s+|$)");
-            css = css.replace(re," ");
-        }
-        el.className = css;
+        var arg = Array.prototype.join.call((isArray(arguments[0])?arguments[0]:arguments),"|");
+        if (!arguments.callee.cache) arguments.callee.cache = {}
+        var c = arguments.callee.cache
+        if (!c.hasOwnProperty(arg)) c[arg] = new RegExp("(^|\\s+)("+arg+")(\\s+|$)","g");
+        el.className = el.className.replace(c[arg]," ");
         return self;
     };
     /**
