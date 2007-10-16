@@ -129,7 +129,7 @@ var EM = new function () {
                if (init) init.call(e);
             }
         }
-        if (!e.target) e.target = e.srcElement;
+        if (!e.target && e.type != 'unload') e.target = e.srcElement;
         return e;
     };
     /**
