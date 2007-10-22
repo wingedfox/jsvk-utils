@@ -66,7 +66,7 @@ var EM = new function () {
            ,fe = true
            ,res = true;
 
-        if (!(id = e.currentTarget[keys.UEID]) || !(hid = pool[id].handler[e.type])) return;
+        if (!e.currentTarget || !(id = e.currentTarget[keys.UEID]) || !(hid = pool[id].handler[e.type])) return;
 
         try {
             for (var i=0, hL=hid.length; i<hL; i++) if (isFunction(hid[i])) res=res&&!(false===hid[i].call(e.currentTarget, e));
@@ -512,7 +512,7 @@ EM.EU = [
     //For Mozilla
     EM.addEventListener(document,'DOMContentLoaded', handlers.mz);
     //For Safari and Opera
-    if(/WebKit|Khtml/i.test(navigator.userAgent)||(window.opera&&parseInt(window.opera.version())<9))(function(){/loaded|complete/.test(document.readystate)?evt.trigger(document):setTimeout(arguments.callee,100)})();
+    if(/WebKit|Khtml/i.test(navigator.userAgent)||(window.opera&&parseInt(window.opera.version())<9))(function(){/loaded|complete/.test(document.readyState)?(evt.trigger(window),executed=true):setTimeout(arguments.callee,100)})();
     //For someone else
     EM.addEventListener(window, 'load', handlers.mz);
 })();
