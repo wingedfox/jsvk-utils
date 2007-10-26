@@ -60,9 +60,7 @@ DOM.getOffset = function (el /* :HTMLElement */) /* :Object */ {
        ,el = o; // "el" will be nodes as we walk up, "o" will be saved for offsetParent references
     while (el.parentNode!=null) {
       el = el.parentNode;
-      if (el.offsetParent==null) {
-      }
-      else {
+      if (el.offsetParent!==null) {
         var considerScroll = true;
         /*
         In Opera, if parentNode of the first object is scrollable, then offsetLeft/offsetTop already 
