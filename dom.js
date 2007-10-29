@@ -325,7 +325,7 @@ DOM.CSS = function (el) {
     self.getComputedStyle = function(prop) {
         var y;
         if (el.currentStyle)
-            y = prop?el.currentStyle[prop]:x.currentStyle;
+            y = prop?el.currentStyle[prop]:y.currentStyle;
         else if (window.getComputedStyle) {
             y = document.defaultView.getComputedStyle(el,null);
             if (prop) y=y.getPropertyValue(prop)
