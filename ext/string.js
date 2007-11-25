@@ -18,7 +18,7 @@ String.prototype.entityDecode = function() {
     if (!arguments.callee.span) arguments.callee.span = document.createElement('span');
     var s = arguments.callee.span;
     s.innerHTML = this;
-    return s.firstChild.nodeValue;
+    return s.firstChild?s.firstChild.nodeValue:"";
 }
 
 /**
