@@ -70,7 +70,7 @@ var EM = new function () {
 
         try {
             for (var i=0, hL=hid.length; i<hL; i++) if (isFunction(hid[i])) res=res&&!(false===hid[i].call(e.currentTarget, e));
-        } catch (err) { setTimeout(function(){throw new Error("Event handler for ["+err.type+"] has failed with exception: \""+err.message+"\"");},10) }
+        } catch (err) { setTimeout(function(){throw new Error("Event handler for ["+e.type+"] has failed with exception: \""+err.message+"\"");},10) }
 
         return res;
     };
@@ -274,7 +274,7 @@ var EM = new function () {
         pool[id] = {'node' : o,
                     'handler' : []};
 
-        return new EM.EventTarget(n, o, b, d);
+        return new EM.EventTarget(o, n, b, d);
     };
     /**
      *  Performs object initialization
@@ -314,7 +314,7 @@ EM.stopPropagationAction = function(e) {
  *  @param {Boolean} bubble flag allowing event to bubble across element.parentNode
  *  @param {Function} def default action for the event
  */
-EM.EventTarget = function (name, obj, bubble, def) {
+EM.EventTarget = function (obj, name, bubble, def) {
     var self = this;
 
     /**
@@ -346,6 +346,10 @@ EM.EventTarget = function (name, obj, bubble, def) {
      *  @param {Object} event data
      */
     self.trigger = function (el, data) {
+        if (!(arguments.length-1) && el!=obj) {
+            data = el;
+            el = null;
+        }
         if (!el) el = obj;
         var e = {}
            ,res = true
