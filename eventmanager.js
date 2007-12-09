@@ -271,9 +271,12 @@ var EM = new function () {
      */
     self.registerEvent = function (o, n, b, d) {
         var id = getUEID(o,true);
-        pool[id] = {'node' : o,
-                    'handler' : []};
-
+        if (!pool[id]) {
+            pool[id] = {'node' : o,
+                        'handler' : []};
+        } else {
+            pool[id].node = o;
+        }
         return new EM.EventTarget(o, n, b, d);
     };
     /**
