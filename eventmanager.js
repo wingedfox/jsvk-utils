@@ -246,15 +246,12 @@ var EM = new function () {
     /**
      *  Dispatch custom events on the specified element
      *
-     *  @param {Object} el element to fire event on
      *  @param {Object} e event object itself
      *  @return {Boolean} cancelled status
      *  @scope public
      */
-    self.dispatchEvent = function (el,e) {
-        e.currentTarget = el;
+    self.dispatchEvent = function (e) {
         var res = rootEventHandler(e);
-        e.currentTarget = null;
         return res;
     };
     /**
@@ -375,8 +372,9 @@ EM.EventTarget = function (obj, name, bubble, def) {
             e.preventDefault = preventDefault;
             e.stopPropagation = stopPropagation;
             e.target = el;
+            e.currentTarget = el;
             e.type = name;
-            tmp = EM.dispatchEvent(el, e);
+            tmp = EM.dispatchEvent(e);
             undef &= (isUndefined(tmp))
             res &= !(false===tmp);
         } while ((el = el.parentNode) && canBubble);
