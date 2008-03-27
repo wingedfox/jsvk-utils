@@ -86,12 +86,13 @@ var EM = new function () {
             if (pool[i] && (el=(pid = pool[i]).node)) {
                 for (var z in pid.handler) {
                     if (!pid.handler.hasOwnProperty(z)) continue;
-
-                    if (el.removeEventListener) {
-                        el.removeEventListener(z, pid.rootEHCaller?pid.rootEHCaller:rootEventHandler, false);
-                    } else if (el.detachEvent) {
-                        el.detachEvent('on'+z, pid.rootEHCaller?pid.rootEHCaller:rootEventHandler);
-                    }
+                    try {
+                        if (el.removeEventListener) {
+                            el.removeEventListener(z, pid.rootEHCaller?pid.rootEHCaller:rootEventHandler, false);
+                        } else if (el.detachEvent) {
+                            el.detachEvent('on'+z, pid.rootEHCaller?pid.rootEHCaller:rootEventHandler);
+                        }
+                    } catch (e) {}
                     pid.handler[z].length = 0;
                 }
             }
