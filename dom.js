@@ -135,7 +135,20 @@ DOM.getOffset = function (el /* :HTMLElement */) /* :Object */ {
  */
 DOM.getClientWidth = function () /* :Number */{
     var w=0;
-    if (self.innerHeight) w = self.innerWidth;
+    if (self.innerWidth) w = self.innerWidth;
+    else if (document.documentElement && document.documentElement.clientWidth) w = document.documentElement.clientWidth;
+    else if (document.body) w = document.body.clientWidth;
+    return w;
+};
+/**
+ *  Returns the width of the window itself
+ * 
+ *  @return {Number}
+ *  @scope public
+ */
+DOM.getOffsetWidth = function () /* :Number */{
+    var w=0;
+    if (self.outerWidth) w = self.outerWidth;
     else if (document.documentElement && document.documentElement.clientWidth) w = document.documentElement.clientWidth;
     else if (document.body) w = document.body.clientWidth;
     return w;
@@ -152,6 +165,19 @@ DOM.getClientHeight = function () /* :Number */{
     else if (document.documentElement && document.documentElement.clientHeight) h = document.documentElement.clientHeight;
     else if (document.body) h = document.body.clientHeight;
     return h;
+};
+/**
+ *  Returns the height of the window itself
+ * 
+ *  @return {Number}
+ *  @scope public
+ */
+DOM.getOffsetHeight = function () /* :Number */{
+    var w=0;
+    if (self.outerHeight) w = self.outerHeight;
+    else if (document.documentElement && document.documentElement.clientHeight) w = document.documentElement.clientHeight;
+    else if (document.body) w = document.body.clientHeight;
+    return w;
 };
 /**
  *  Returns the height of the scrolled area for the body
@@ -217,25 +243,34 @@ DOM.hasTagName = function (prop /* :HTMLElement */, tags /* :String, Array */) {
  *  @scope public
  */
 DOM.color2rgb = function (prop) {
-     var e;
-     /*
-     *  note, properties like borderColor might have the series of colors
-     */
-     if (/^([a-z]+)($|\s[a-z]+)/i.test(prop)) {
-         var d = document.body, ov = d.vLink;
-         d.vLink = prop.split(" ")[0];
-         prop = d.vLink;
-         d.vLink = ov;
-     }
-     try {
-     if (e = prop.match(/^#([\da-f]{6})$/i))
-         return e=parseInt(e[1],16),[(e&0xff0000)>>16,(e&0xff00)>>8,(e&0xff)]
-     else if (e = prop.match(/^#([\da-f]{3})$/i)) {
-         return e=parseInt(e[1],16),[((e&0xf00)>>8)*0x11,((e&0xf0)>>4)*0x11,(e&0xf)*0x11];
-     } else
-         return (prop.match(/([\d%]+)/g).splice(0,3).map(function(a){ return /%/.test(a)?(parseInt(a)*2.55).toFixed(0):parseInt(a)}))
-     } catch(err){
-     }
+    var e;
+    /*
+    *  note, properties like borderColor might have the series of colors
+    */
+    if (/^([a-z]+)($|\s[a-z]+)/i.test(prop)) {
+        var d = document.body, ov = d.vLink;
+        d.vLink = prop.split(" ")[0];
+        prop = d.vLink;
+        d.vLink = ov;
+    }
+    try {
+        if (e = prop.match(/^#([\da-f]{6})$/i)) {
+            return e=parseInt(e[1],16),[(e&0xff0000)>>16,(e&0xff00)>>8,(e&0xff)]
+        } else if (e = prop.match(/^#([\da-f]{3})$/i)) {
+            return e=parseInt(e[1],16),[((e&0xf00)>>8)*0x11,((e&0xf0)>>4)*0x11,(e&0xf)*0x11];
+        } else
+            return (prop.match(/([\d%]+)/g).splice(0,3).map(function(a){ return /%/.test(a)?(parseInt(a)*2.55).toFixed(0):parseInt(a)}))
+    } catch(err){
+        return;
+    }
+}
+DOM.setOpacity = function (el, opacity) {
+    if (el.style.opacity != opacity) {
+        el.style.opacity = 
+        el.style.KhtmOpacity =
+        el.style.MozOpacity = opacity;
+        el.style.filter = "alpha(opacity="+(opacity*100)+")";
+    }
 }
 /**
  *  DOM.CSS is the CSS processing class, allowing to easy mangle class names
@@ -271,11 +306,14 @@ DOM.CSS = function (el) {
      *  @scope public
      */
     self.removeClass = function() {
-        var arg = Array.prototype.join.call((isArray(arguments[0])?arguments[0]:arguments),"|");
+        var arg = isArray(arguments[0])?arguments[0]:arguments;
         if (!arguments.callee.cache) arguments.callee.cache = {}
         var c = arguments.callee.cache
-        if (!c.hasOwnProperty(arg)) c[arg] = new RegExp("(^|\\s+)("+arg+")(\\s+|$)","g");
-        el.className = el.className.replace(c[arg]," ");
+        for (var i=0, aL=arg.length; i<aL; i++) {
+            if (!c.hasOwnProperty(arg[i])) c[arg[i]] = new RegExp("(^|\\s+)"+arg[i]+"(\\s+|$)");
+            el.className = el.className.replace(c[arg[i]]," ");
+        }
+        el.className=el.className.replace(/\s{2,}/," ")
         return self;
     };
     /**
