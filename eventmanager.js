@@ -518,7 +518,8 @@ EM.EU = [
     //For Mozilla
     EM.addEventListener(document,'DOMContentLoaded', handlers.mz);
     //For Safari and Opera
-    if(/WebKit|Khtml/i.test(navigator.userAgent)||(window.opera&&parseInt(window.opera.version())<9))(function(){/loaded|complete/.test(document.readyState)?(evt.trigger(window),executed=true):setTimeout(arguments.callee,100)})();
+    if (/WebKit|Khtml/i.test(navigator.userAgent)||(window.opera&&parseInt(window.opera.version())<9))
+        (function(){if (!executed) /loaded|complete/.test(document.readyState)?(evt.trigger(window),executed=true):setTimeout(arguments.callee,100)})();
     //For someone else
     EM.addEventListener(window, 'load', handlers.mz);
 })();
