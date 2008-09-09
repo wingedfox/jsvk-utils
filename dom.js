@@ -1,17 +1,17 @@
-/*
-*  $Id$
-*  $HeadURL$
-*
-*  DOM-related stuff and CSS manipulation class
-*
-*  @author Ilya Lebedev
-*  @author $Author$
-*  @modified $Date$
-*  @version $Rev$
-*  @license LGPL
-*  @depends helpers.js
-*  @depends arrayextensions.js
-*/
+/**
+ *  $Id$
+ *  $HeadURL$
+ *
+ *  DOM-related stuff and CSS manipulation class
+ *
+ *  @author Ilya Lebedev
+ *  @author $Author$
+ *  @modified $Date$
+ *  @version $Rev$
+ *  @license LGPL
+ *  @depends helpers.js
+ *  @depends arrayextensions.js
+ */
 
 if (isUndefined(DOM)) var DOM = {};
 /**
@@ -130,73 +130,108 @@ DOM.getOffset = function (el /* :HTMLElement */) /* :Object */ {
 /**
  *  Returns the width of the window canvas
  * 
+ *  @param {HTMLElement} el optional target node
  *  @return {Number}
  *  @scope public
  */
-DOM.getClientWidth = function () /* :Number */{
-    var w=0;
-    if (self.innerWidth) w = self.innerWidth;
-    else if (document.documentElement && document.documentElement.clientWidth) w = document.documentElement.clientWidth;
-    else if (document.body) w = document.body.clientWidth;
+DOM.getClientWidth = function (el) /* :Number */{
+    var win = this.getWindow(el)
+       ,doc = win.document
+       ,w=0;
+    if (win.innerWidth) w = win.innerWidth;
+    else if (doc.documentElement && doc.documentElement.clientWidth) w = doc.documentElement.clientWidth;
+    else if (doc.body) w = doc.body.clientWidth;
     return w;
 };
 /**
  *  Returns the width of the window itself
  * 
+ *  @param {HTMLElement} el optional target node
  *  @return {Number}
  *  @scope public
  */
-DOM.getOffsetWidth = function () /* :Number */{
-    var w=0;
-    if (self.outerWidth) w = self.outerWidth;
-    else if (document.documentElement && document.documentElement.clientWidth) w = document.documentElement.clientWidth;
-    else if (document.body) w = document.body.clientWidth;
+DOM.getOffsetWidth = function (el) /* :Number */{
+    var win = this.getWindow(el)
+       ,doc = win.document
+       ,w=0;
+    if (win.outerWidth) w = win.outerWidth;
+    else if (doc.documentElement && doc.documentElement.clientWidth) w = doc.documentElement.clientWidth;
+    else if (doc.body) w = doc.body.clientWidth;
     return w;
 };
 /**
  *  Returns the height of the window canvas
  * 
+ *  @param {HTMLElement} el optional target node
  *  @return {Number}
  *  @scope public
  */
-DOM.getClientHeight = function () /* :Number */{
-    var h=0;
-    if (self.innerHeight) h = self.innerHeight;
-    else if (document.documentElement && document.documentElement.clientHeight) h = document.documentElement.clientHeight;
-    else if (document.body) h = document.body.clientHeight;
+DOM.getClientHeight = function (el) /* :Number */{
+    var win = this.getWindow(el)
+       ,doc = win.document
+       ,h=0;
+    if (win.innerHeight) h = win.innerHeight;
+    else if (doc.documentElement && doc.documentElement.clientHeight) h = doc.documentElement.clientHeight;
+    else if (doc.body) h = doc.body.clientHeight;
     return h;
 };
 /**
  *  Returns the height of the window itself
  * 
+ *  @param {HTMLElement} el optional target node
  *  @return {Number}
  *  @scope public
  */
-DOM.getOffsetHeight = function () /* :Number */{
-    var w=0;
-    if (self.outerHeight) w = self.outerHeight;
-    else if (document.documentElement && document.documentElement.clientHeight) w = document.documentElement.clientHeight;
-    else if (document.body) w = document.body.clientHeight;
-    return w;
+DOM.getOffsetHeight = function (el) /* :Number */{
+    var win = this.getWindow(el)
+       ,doc = win.document
+       ,h=0;
+    if (win.outerHeight) h = win.outerHeight;
+    else if (doc.documentElement && doc.documentElement.clientHeight) h = doc.documentElement.clientHeight;
+    else if (doc.body) h = doc.body.clientHeight;
+    return h;
 };
 /**
  *  Returns the height of the scrolled area for the body
  * 
+ *  @param {HTMLElement} el optional target node
  *  @return {Number}
  *  @scope public
  */
-DOM.getBodyScrollTop = function () /* :Number */{
-    return self.pageYOffset || (document.documentElement && document.documentElement.scrollTop) || (document.body && document.body.scrollTop);
+DOM.getBodyScrollTop = function (el) /* :Number */{
+    var win = this.getWindow(el)
+       ,doc = win.document;
+    return win.pageYOffset || (doc.documentElement && doc.documentElement.scrollTop) || (doc.body && doc.body.scrollTop);
 };
 /**
  *  Returns the height of the scrolled area for the body
  * 
+ *  @param {HTMLElement} el optional target node
  *  @return {Number}
  *  @scope public
  */
-DOM.getBodyScrollLeft = function () /* :Number */{
-    return self.pageXOffset || (document.documentElement && document.documentElement.scrollLeft) || (document.body && document.body.scrollLeft);
+DOM.getBodyScrollLeft = function (el) /* :Number */{
+    var win = this.getWindow(el)
+       ,doc = win.document;
+    return win.pageXOffset || (doc.documentElement && doc.documentElement.scrollLeft) || (doc.body && doc.body.scrollLeft);
 };
+/**
+ *  Tries to find the window for the target element
+ *  Returns main window, if no target specified
+ *
+ *  @param {HTMLElement} el optional target node
+ *  @return {Window} target window
+ *  @scope public
+ */
+DOM.getWindow = function (el) {
+    var win = window;
+    if (el) {
+        var doc = el.ownerDocument;
+        win = doc.defaultView || doc.parentWindow || doc.window || window;
+    }
+    return win;
+}
+
 /**
  *  Calculates cursor position properly
  *
