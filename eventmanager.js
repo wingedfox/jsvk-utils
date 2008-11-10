@@ -456,7 +456,8 @@ EM.EU = [
         ['getKeyCode', function () {
                  switch (this.keyCode) {
                      case 189: return 109;
-                     case 187: return 61;
+                     case 187: return 61;  // InternetExplorer
+                     case 107: return 61;  // Firefox3
                      case 186: return 59;
                      default:  return this.keyCode;
                  }
