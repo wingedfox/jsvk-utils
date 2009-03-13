@@ -15,13 +15,12 @@
  * @scope public
  */
 String.fromCharCodeExt = function(code) {
-        if (code<0x10000) {
-            return String.fromCharCode(code);
-        }
-        code -= 0x10000;
-        return String.fromCharCode(code >>10 | 0xD800)+String.fromCharCode(code & 0x3FF | 0xDC00)
+    if (code<0x10000) {
+        return String.fromCharCode(code);
     }
-})();
+    code -= 0x10000;
+    return String.fromCharCode(code >>10 | 0xD800)+String.fromCharCode(code & 0x3FF | 0xDC00)
+}
 /**
  *  Decodes html entities
  *
