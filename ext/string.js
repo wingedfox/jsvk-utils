@@ -7,7 +7,21 @@
  *  @license LGPL
  *  @version $Rev$
  */
-
+/**
+ * Converts UTF-32 codes to string of chars
+ *
+ * @param {Number} code char code
+ * @return {String}
+ * @scope public
+ */
+String.fromCharCodeExt = function(code) {
+        if (code<0x10000) {
+            return String.fromCharCode(code);
+        }
+        code -= 0x10000;
+        return String.fromCharCode(code >>10 | 0xD800)+String.fromCharCode(code & 0x3FF | 0xDC00)
+    }
+})();
 /**
  *  Decodes html entities
  *
