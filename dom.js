@@ -307,6 +307,154 @@ DOM.setOpacity = function (el, opacity) {
         el.style.filter = "alpha(opacity="+(opacity*100)+")";
     }
 }
+
+/**
+ *  Singleton for the stylesheets operations
+ *
+ *  @param {String} sname stylesheet to operate with, should contain a path part with or without ".css" suffix (will be added, whether not exists)
+ *  @param {Window} win optional window object to look the stylesheet for, if null current one will be used
+ *  @return {DOM.StyleSheet} interface to operate on the stylesheet
+ */
+DOM.StyleSheet = (function () {
+    var StyleSheet = function (sname, win) {
+        var self = this;
+
+        /**
+         *  Helper method, runs given operation on the stylesheet
+         *
+         *  @param {Function} callback function with the single argument, performing some operation on found stylesheet(s)
+         *  @return {Number} number of the processed stylesheets
+         *  @scope private
+         */
+        var operate = function (callback) {
+            var n  = 0;
+            if (sname && callback) {
+                var ss = win.document.getElementsByTagName("link")
+                   ,sr = new RegExp(sname+"$","i");
+                for (var i=0, ssL = ss.length; i<ssL; i++) {
+                    var sheet = ss[i];
+                    if (sr.test(sheet.href)) {
+                        callback(sheet);
+                        n++;
+                    }
+                }
+            }
+            return n;
+        }
+
+        /**
+         *  Helper method, retrieves the matching stylesheet urls
+         *
+         *  @return {Array} list of matching stylesheet urls
+         *  @scope private
+         */
+        var get = function () {
+            var sheets = [];
+            if (sname) {
+                var h  = win.document.getElementsByTagName('head')[0]
+                   ,sr = new RegExp('<link[^>]+?href\\s*=\\s*["\']?(([^>]+?/|)'+sname+'[^"\'\\s]*)[^>]*>','ig')
+                   ,m  = sr.exec(h.innerHTML);
+
+                while (m && m[1]) {
+                    sheets.push(m[1]);
+                    m = sr.exec(h.innerHTML);
+                }
+            }
+            return sheets;
+        }
+
+        /**
+         *  Removes given stylesheet(s) from the document
+         *
+         *  @return {Number} number of processed stylesheets
+         *  @scope public
+         */
+        self.remove = function () {
+            return operate (function (el) { el.parentNode.removeChild(el)});
+        }
+
+        /**
+         *  Disables given stylesheet(s) from the document
+         *
+         *  @return {Number} number of processed stylesheets
+         *  @scope public
+         */
+        self.disable = function () {
+            return operate (function (el) { el.disabled=true});
+        }
+
+        /**
+         *  Enables given stylesheet(s) from the document
+         *
+         *  @param {String} sname stylesheet to look for, preferably the full url, might be looked up by @{link #DOM.getStylesheets}
+         *  @param {Window} win optional window object to look the stylesheet in, if null default one will be used
+         *  @return {Number} number of processed stylesheets
+         *  @scope public
+         */
+        self.enable = function () {
+            return operate (function (el) { el.disabled=false});
+        }
+
+        /**
+         *  Checks whether the stylesheet has been attached to the document
+         *
+         *  @param {String} sname stylesheet to look for, should contain a path part with or without ".css" suffix (will be added, whether not exists)
+         *  @param {Window} win optional window object to look the stylesheet, if null current one will be used
+         *  @return {Boolean} true if any stylesheet for the given name found
+         *  @scope public
+         */
+        self.add = function () {
+            if (!self.exists()) {
+                var head = win.document.getElementsByTagName('head')[0]
+                   ,s = win.document.createElement('link');
+                s.rel = 'stylesheet';
+                s.type= 'text/css';
+                s.href= sname;
+                head.appendChild(s);
+            }
+        }
+
+        /**
+         *  Checks whether the stylesheet has been attached to the document
+         *
+         *  @return {Boolean} true if any stylesheet for the given name found
+         *  @scope public
+         */
+        self.exists = function () {
+            return Boolean(get().length);
+        }
+
+        /**
+         *  Counts the number of matching stylesheets
+         *
+         *  @return {Number} count of found stylesheets
+         */
+        self.count = function () {
+            return get().length;
+        }
+
+        /**
+         *  Checks whether the stylesheet has been attached to the document
+         *
+         *  @return {String} full path t the first matching stylesheet or empty string if nothing found
+         *  @scope public
+         */
+        self.get = function (idx) {
+            return get()[(parseInt(idx) || 0)];
+        }
+    }
+
+    return function (sname, win) {
+        if (sname && !/\.css$/i.test(sname)) {
+            sname += ".css";
+        }
+        if (!win || !win.document) {
+            win = window;
+        }
+        return new StyleSheet(sname, win);
+    }
+
+})();
 /**
  *  DOM.CSS is the CSS processing class, allowing to easy mangle class names
  *
