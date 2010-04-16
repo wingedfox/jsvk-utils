@@ -180,7 +180,7 @@ var EM = new function () {
         *  prepare handlers storage in the pool object, if needed
         */
         if (!pid.handler.hasOwnProperty(et)) {
-            pid.handler[et] = [];
+            pid.handler[et] = hid = [];
             /*
             *  if we a here, this means that we have not connected to a node yet
             *  note, we've already made a check for the required methods existense
@@ -191,16 +191,17 @@ var EM = new function () {
                 /*
                 *  this workaround is used to avoid IE's lack of currentTarget property
                 */
-                pid.rootEHCaller = function(e) { 
+                hid.rootEHCaller = function(e) { 
                     e.currentTarget = pid.node;//pool[id].node;
                     var res = rootEventHandler(e);
                     e.currentTarget = null;
                     return res;
                 };
-                el.attachEvent('on'+et, pid.rootEHCaller);
+                el.attachEvent('on'+et, hid.rootEHCaller);
             }
-        };
-        hid = pid.handler[et];
+        } else {
+            hid = pid.handler[et];
+        }
         /*
         *  finally, attach handler, if it was not attached before
         */
@@ -235,9 +236,9 @@ var EM = new function () {
                 *  remove the actual listener
                 */
                 if (el.removeEventListener) {
-                    el.removeEventListener(et, pid.rootEHCaller?pid.rootEHCaller:rootEventHandler, false);
+                    el.removeEventListener(et, eid.rootEHCaller?eid.rootEHCaller:rootEventHandler, false);
                 } else if (el.detachEvent) {
-                    el.detachEvent('on'+et, pid.rootEHCaller?pid.rootEHCaller:rootEventHandler);
+                    el.detachEvent('on'+et, eid.rootEHCaller?eid.rootEHCaller:rootEventHandler);
                 }
             }
             return true;
