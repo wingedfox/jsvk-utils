@@ -490,13 +490,16 @@ DOM.CSS = (function () {
      */
     self.removeClass = function() {
         var arg = isArray(arguments[0])?arguments[0]:arguments;
-        if (!arguments.callee.cache) arguments.callee.cache = {}
-        var c = arguments.callee.cache
+        var ac = arguments.callee;
+        if (!ac.cache) ac.cache = {};
+        var c = ac.cache;
+        var el = self.el;
         for (var i=0, aL=arg.length; i<aL; i++) {
-            if (!c.hasOwnProperty(arg[i])) c[arg[i]] = new RegExp("(^|\\s+)"+arg[i]+"(\\s+|$)");
-            self.el.className = self.el.className.replace(c[arg[i]]," ");
+            var a = arg[i];
+            if (!c.hasOwnProperty(a)) c[a] = new RegExp("((^|\\s+)"+a+"(?=\\s|$))+","g");
+            el.className = el.className.replace(c[a]," ");
         }
-        self.el.className=self.el.className.replace(/\s{2,}/," ")
+        el.className=el.className.replace(/\s{2,}/g," ")
         return self;
     };
     /**
