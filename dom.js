@@ -257,7 +257,7 @@ DOM.getCursorPosition = function (e) {
  *  @scope public
  */
 DOM.hasTagName = function (prop /* :HTMLElement */, tags /* :String, Array */) {
-    if (isString(tags)) tags = [tags];
+    if ("string" == typeof tags) tags = [tags];
     if (!isArray(tags) || isEmpty(tags) || isUndefined(prop) || isEmpty(prop.tagName)) return false;
     var t = prop.tagName.toLowerCase();
     for (var i=0, tL=tags.length; i<tL; i++) {
@@ -466,8 +466,8 @@ DOM.StyleSheet = (function () {
  *  @depends arrayextensions.js
  *  @depends helpers.js
  */
-DOM.CSS = function (el) {
-    var self = this
+DOM.CSS = (function () {
+    var self = arguments.callee;
     /**
      *  Adds the class name, unlimited number of arguments is supported
      *
@@ -478,7 +478,7 @@ DOM.CSS = function (el) {
     self.addClass = function() {
         var arg = isArray(arguments[0])?arguments[0]:Array.prototype.slice.call(arguments);
         self.removeClass(arg);
-        el.className = el.className+" "+Array.prototype.join.call(arg," ");
+        self.el.className = self.el.className+" "+Array.prototype.join.call(arg," ");
         return self;
     };
     /**
@@ -494,9 +494,9 @@ DOM.CSS = function (el) {
         var c = arguments.callee.cache
         for (var i=0, aL=arg.length; i<aL; i++) {
             if (!c.hasOwnProperty(arg[i])) c[arg[i]] = new RegExp("(^|\\s+)"+arg[i]+"(\\s+|$)");
-            el.className = el.className.replace(c[arg[i]]," ");
+            self.el.className = self.el.className.replace(c[arg[i]]," ");
         }
-        el.className=el.className.replace(/\s{2,}/," ")
+        self.el.className=self.el.className.replace(/\s{2,}/," ")
         return self;
     };
     /**
@@ -508,7 +508,7 @@ DOM.CSS = function (el) {
      */
     self.hasClass = function(c) {
         re=new RegExp("(^|\\s+)"+c+"(\\s+|$)");
-        return el.className.match(re," "+c+" ");
+        return self.el.className.match(re," "+c+" ");
     };
     /**
      *  Returns the actual CSS class for the element
@@ -517,7 +517,7 @@ DOM.CSS = function (el) {
      *  @scope public
      */
     self.getClass = function() {
-        return el.className;
+        return self.el.className;
     }
     /**
      *  Retrieves class value from class name by pattern 
@@ -530,7 +530,7 @@ DOM.CSS = function (el) {
      *  @scope public
      */
     self.getClassValue = function(c) {
-        var vals = el.className.match(new RegExp("(^|\\s)"+c+":([^\\s]+)"));
+        var vals = self.el.className.match(new RegExp("(^|\\s)"+c+":([^\\s]+)"));
     
         return vals?((vals[2].indexOf(":")+1)?vals[2].split(":")
                                              :vals[2])
@@ -545,8 +545,8 @@ DOM.CSS = function (el) {
      */
     self.getComputedStyle = function(prop) {
         var y;
-        if (el.currentStyle)
-            y = prop?el.currentStyle[prop]:el.currentStyle;
+        if (self.el.currentStyle)
+            y = prop?self.el.currentStyle[prop]:self.el.currentStyle;
         else if (window.getComputedStyle) {
             y = document.defaultView.getComputedStyle(el,null);
             if (prop) y=y[prop];
@@ -555,5 +555,9 @@ DOM.CSS = function (el) {
         }
         return y;
     }
-    return this;
-};
+
+    return function(el) {
+        self.el = el;
+        return self;
+    }
+})();
