@@ -477,8 +477,8 @@ DOM.CSS = (function () {
      */
     self.addClass = function() {
         var arg = isArray(arguments[0])?arguments[0]:Array.prototype.slice.call(arguments);
-        self.removeClass(arg);
-        self.el.className = self.el.className+" "+Array.prototype.join.call(arg," ");
+        var el = self.el;
+        el.className = el.className+" "+Array.prototype.join.call(arg," ");
         return self;
     };
     /**
@@ -548,8 +548,9 @@ DOM.CSS = (function () {
      */
     self.getComputedStyle = function(prop) {
         var y;
+        var el = self.el;
         if (self.el.currentStyle)
-            y = prop?self.el.currentStyle[prop]:self.el.currentStyle;
+            y = prop?el.currentStyle[prop]:el.currentStyle;
         else if (window.getComputedStyle) {
             y = document.defaultView.getComputedStyle(el,null);
             if (prop) y=y[prop];
