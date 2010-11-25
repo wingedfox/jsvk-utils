@@ -68,9 +68,9 @@ var EM = new function () {
 
         if (!e.currentTarget || !(id = e.currentTarget[keys.UEID]) || !(hid = pool[id].handler[e.type])) return;
 
-//        try {
-            for (var i=0, hL=hid.length; i<hL; i++) res=res&&!(false===hid[i].call(e.currentTarget, e));
-//        } catch (err) { setTimeout(function(){throw new Error("Event handler for ["+e.type+"] has failed with exception: \""+err.message+"\"");},10) }
+        try {
+            for (var i=0, hL=hid.length; i<hL; i++) if (isFunction(hid[i])) res=res&&!(false===hid[i].call(e.currentTarget, e));
+        } catch (err) { setTimeout(function(){throw new Error("Event handler for ["+e.type+"] has failed with exception: \""+err.message+"\"");},10) }
 
         return res;
     };
