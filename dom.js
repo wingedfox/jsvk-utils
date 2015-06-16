@@ -1,19 +1,19 @@
 /**
- *  $Id$
- *  $HeadURL$
+ *  $Id: dom.js 703 2010-11-23 17:28:05Z wingedfox $
+ *  $HeadURL: http://svn.debugger.ru/repos/jslibs/BrowserExtensions/trunk/dom.js $
  *
  *  DOM-related stuff and CSS manipulation class
  *
  *  @author Ilya Lebedev
- *  @author $Author$
- *  @modified $Date$
- *  @version $Rev$
+ *  @author $Author: wingedfox $
+ *  @modified $Date: 2010-11-23 20:28:05 +0300 (Вт., 23 нояб. 2010) $
+ *  @version $Rev: 703 $
  *  @license LGPL
- *  @depends helpers.js
- *  @depends arrayextensions.js
  */
 
-if (isUndefined(DOM)) var DOM = {};
+(function(global){
+
+var DOM = {};
 /**
  *  Performs parent lookup by
  *   - node object: actually it's "is child of" check
@@ -29,7 +29,7 @@ if (isUndefined(DOM)) var DOM = {};
 DOM.getParent = function (el /* : HTMLElement */, cp /* :String, HTMLElement */, vl /* :String */) /* :HTMLElement */ {
   if (el == null) return null;
   else if (el.nodeType == 1 &&
-      ((!isUndefined(vl) && el[cp] == vl) ||
+      ((void(vl) !== vl && el[cp] == vl) ||
        ('string' == typeof cp && DOM.hasTagName(el, cp)) ||
        el == cp)) return el;
   else return arguments.callee(el.parentNode, cp, vl); 
@@ -258,7 +258,7 @@ DOM.getCursorPosition = function (e) {
  */
 DOM.hasTagName = function (prop /* :HTMLElement */, tags /* :String, Array */) {
     if ("string" == typeof tags) tags = [tags];
-    if (!isArray(tags) || isEmpty(tags) || isUndefined(prop) || isEmpty(prop.tagName)) return false;
+    if (!(tags instanceof Array) || '' == tags || void(prop) === prop || '' == prop.tagName) return false;
     var t = prop.tagName.toLowerCase();
     for (var i=0, tL=tags.length; i<tL; i++) {
         if (tags[i].toLowerCase() == t) return true;
@@ -476,7 +476,7 @@ DOM.CSS = (function () {
      *  @scope public
      */
     self.addClass = function() {
-        var arg = isArray(arguments[0])?arguments[0]:Array.prototype.slice.call(arguments);
+        var arg = 'array' == typeof arguments[0] ? arguments[0]:Array.prototype.slice.call(arguments);
         var el = self.el;
         el.className = el.className+" "+Array.prototype.join.call(arg," ");
         return self;
@@ -489,7 +489,7 @@ DOM.CSS = (function () {
      *  @scope public
      */
     self.removeClass = function() {
-        var arg = isArray(arguments[0])?arguments[0]:arguments;
+        var arg = 'array' == typeof arguments[0] ? arguments[0]:arguments;
         var ac = arguments.callee;
         if (!ac.cache) ac.cache = {};
         var c = ac.cache;
@@ -565,3 +565,13 @@ DOM.CSS = (function () {
         return self;
     }
 })();
+    // exports to multiple environments
+    if (typeof define === 'function' && define.amd) { //RequireJS
+        define(function () { return DOM; });
+    } else if (typeof module !== 'undefined' && module.exports) { //CommonJS
+        module.exports = DOM;
+    } else { //browser
+        global.DOM = DOM;
+    }
+
+}(this));

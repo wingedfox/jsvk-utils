@@ -1,0 +1,31 @@
+{
+  "name": "Javascript Virtual Keyboard utilities",
+  "version": "0.1.0",
+  "homepage": "https://github.com/wingedfox/jsvk-utils",
+  "authors": [
+    "Ilya WingedFox Lebedev <ilya@lebedev.net>"
+  ],
+  "description": "Different utils for jsvk",
+  "main": [
+    "dom.js",
+    "eventmanager.js",
+    "ext/string.js",
+  ]
+  "moduleType": [
+    "amd",
+    "global"
+  ],
+  "keywords": [
+    "event",
+    "keyboard",
+    "mouse"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

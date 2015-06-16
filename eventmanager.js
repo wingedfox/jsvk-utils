@@ -13,6 +13,8 @@
  *  @class
  *  @constructor EventManager
  */
+
+(function(global){
 var EM = new function () {
     var self = this;
     /**
@@ -98,10 +100,10 @@ var EM = new function () {
             }
             el = pid.node = null;
        }
-       if (window.removeEventListener) {
-           window.removeEventListener(z, arguments.callee, false);
+       if (global.removeEventListener) {
+           global.removeEventListener(z, arguments.callee, false);
        } else {
-           window.detachEvent('on'+z, arguments.callee);
+           global.detachEvent('on'+z, arguments.callee);
        }
     };
     /**************************************************************************
@@ -157,7 +159,7 @@ var EM = new function () {
      *  @scope public
      */
     self.addEventListener = function (el, et, h) {
-        if (!el || !isFunction(h)) return false;
+        if (!el || 'function' != typeof h) return false;
 //        if (!el.addEventListener && !el.attachEvent) return false;
         /*
         *  unique identifier is used to keep an eye on the element
@@ -221,7 +223,7 @@ var EM = new function () {
      *  @scope public
      */
     self.removeEventListener = function (el,et,h) {
-        if (!el || !isFunction(h)) return false;
+        if (!el || !'function' != typeof h) return false;
         var id = getUEID(el)
            ,pid = pool[id]
            ,eid = null;
@@ -286,8 +288,8 @@ var EM = new function () {
         /*
         *  for IE, to dereference event handlers and remove memory leaks
         */
-        if (window.attachEvent && !window.addEventListener) {
-            window.attachEvent('onunload',unloadEventHandler);
+        if (global.attachEvent && !window.addEventListener) {
+            global.attachEvent('onunload',unloadEventHandler);
         }
     };
     __construct();
@@ -333,7 +335,7 @@ EM.EventTarget = function (obj, name, bubble, def) {
      *  @type Function
      *  @scope private
      */
-    var defaultAction = isFunction(def)?def:null;
+    var defaultAction = 'function' == typeof def ? def : null;
     /**************************************************************************
     *  PRIVATE METHODS
     ***************************************************************************/
@@ -377,13 +379,13 @@ EM.EventTarget = function (obj, name, bubble, def) {
             e.currentTarget = el;
             e.type = name;
             tmp = EM.dispatchEvent(e);
-            undef &= (isUndefined(tmp))
+            undef &= (void(tmp) == tmp)
             res &= !(false===tmp);
         } while ((el = el.parentNode) && canBubble);
         /*
         *  try to execute the default action
         */
-        if (isFunction(defaultAction) && res && !undef) {
+        if ('function' == typeof defaultAction && res && !undef) {
             defaultAction(e);
         }
         return (defaultAction && res && !undef);
@@ -496,7 +498,7 @@ EM.EU = [
 */
 (function (){
     
-    var evt = EM.registerEvent(window,'domload')
+    var evt = EM.registerEvent(global,'domload')
        ,executed = false
        ,clearEvents = function() {
            //For IE
@@ -504,16 +506,16 @@ EM.EU = [
            //For Mozilla
            EM.removeEventListener(document, 'DOMContentLoaded', handlers.mz);
            //For someone else
-           EM.removeEventListener(window, 'load', handlers.mz);
+           EM.removeEventListener(global, 'load', handlers.mz);
        }
        ,handlers = { 'ie' : function(e) {
-                               if (window.event.propertyName == 'activeElement' && !executed) {
-                                   evt.trigger(window);
+                               if (global.event.propertyName == 'activeElement' && !executed) {
+                                   evt.trigger(global);
                                    clearEvents();
                                    executed = true;
                                }
                            }
-                    ,'mz' : function (e) {if(!executed)evt.trigger(window); executed=true;}
+                    ,'mz' : function (e) {if(!executed)evt.trigger(global); executed=true;}
                    };
 
     //For IE
@@ -521,8 +523,19 @@ EM.EU = [
     //For Mozilla
     EM.addEventListener(document,'DOMContentLoaded', handlers.mz);
     //For Safari and Opera
-    if (/WebKit|Khtml/i.test(navigator.userAgent)||(window.opera&&parseInt(window.opera.version())<9))
-        (function(){if (!executed) /loaded|complete/.test(document.readyState)?(evt.trigger(window),executed=true):setTimeout(arguments.callee,100)})();
+    if (/WebKit|Khtml/i.test(navigator.userAgent)||(global.opera&&parseInt(global.opera.version())<9))
+        (function(){if (!executed) /loaded|complete/.test(document.readyState)?(evt.trigger(global),executed=true):setTimeout(arguments.callee,100)})();
     //For someone else
-    EM.addEventListener(window, 'load', handlers.mz);
+    EM.addEventListener(global, 'load', handlers.mz);
 })();
+
+    // exports to multiple environments
+    if (typeof define === 'function' && define.amd) { //RequireJS
+        define(function () { return EM; });
+    } else if (typeof module !== 'undefined' && module.exports) { //CommonJS
+        module.exports = EM;
+    } else { //browser
+        global.EM = EM;
+    }
+
+}(this));
