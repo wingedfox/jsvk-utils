@@ -9,7 +9,7 @@
   "main": [
     "dom.js",
     "eventmanager.js",
-    "ext/string.js",
+    "ext/string.js"
   ],
   "moduleType": [
     "amd",
